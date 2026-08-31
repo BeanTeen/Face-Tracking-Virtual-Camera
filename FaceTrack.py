@@ -7,7 +7,7 @@ import urllib.request
 import pyvirtualcam
 import tkinter as tk
 
-model_path = 'blaze_face_short_range.tflite'
+model_path = 'blaze_face_full_range.tflite'
 if not os.path.exists(model_path):
     print("Downloading Face Detection model...")
     url = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_full_range/float16/latest/blaze_face_full_range.tflite"
@@ -128,16 +128,12 @@ with pyvirtualcam.Camera(width=w, height=h, fps=30, fmt=pyvirtualcam.PixelFormat
         if prev_var.get():
             if not prev_open:
                 cv2.namedWindow("Preview", cv2.WINDOW_NORMAL)
-
-            cv2.imshow("Preview", frame)
-
-
-            if not prev_open:
-                cv2.resizeWindow("Preview", 960, 540)
+                cv2.resizeWindow("Preview", 960,540)
                 prev_open=True
-
+                
+            cv2.imshow("Preview", frame)
             cv2.waitKey(1)
-            
+
             try:
                 if cv2.getWindowProperty("Preview", cv2.WND_PROP_VISIBLE)<1:
                     prev_var.set(False)
