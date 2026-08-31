@@ -44,6 +44,8 @@ tk.Scale(root, variable=smoothing_var, from_=0.01, to=0.20, resolution=0.01, ori
 tk.Checkbutton(root, text="Show Preview Window", variable=prev_var).pack(pady=15)
 
 cap=cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
 ret, t_frame=cap.read()
 if not ret:
@@ -126,10 +128,10 @@ with pyvirtualcam.Camera(width=w, height=h, fps=30, fmt=pyvirtualcam.PixelFormat
         if prev_var.get():
             if not prev_open:
                 cv2.namedWindow("Preview", cv2.WINDOW_NORMAL)
-                cv2.resizeWindow("Preview", 960,540)
                 prev_open=True
-                
-            cv2.imshow("Preview", frame)
+
+            display_copy=cv2.resize(frame, (960, 540))
+            cv2.imshow("Preview", display_copy)
             cv2.waitKey(1)
 
             try:
