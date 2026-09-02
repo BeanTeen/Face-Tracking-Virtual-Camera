@@ -1,5 +1,5 @@
 This python script creates a dynamic virtual webcam that automatically tracks, zooms, and pans the video feed so that the user(s) face is always in the direct center.
-It outputs directly to OBS virtual camera which allows it to be used with Discord, Zoom, or any other video capture software.
+It outputs directly to OBS Virtual Camera which allows it to be used with Discord, Zoom, or any other video capture software.
 
 Features:
 This script uses Media Pipe's facial detection model to identify faces and dynamically draws a tracking box around them. A dedicated config panel allows users to adjust the zoom padding (how close the edges of the video are to the edges of the face) and tracking smoothness on the fly. It also includes a toggle-able preview window that renders at a lower resolution so users can see the video being sent to their virtual camera.
