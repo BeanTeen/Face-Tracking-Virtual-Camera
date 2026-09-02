@@ -1,4 +1,6 @@
 import os
+import platform
+import threading
 import urllib.request
 import cv2
 import mediapipe as mp
@@ -24,9 +26,16 @@ if not os.path.exists(MODEL_PATH):
     urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
     print("Download complete.")
 
-base_options=python.BaseOptions(model_asset_path=MODEL_PATH)
-options=vision.FaceDetectorOptions(base_options=base_options)
-detector=vision.FaceDetector.create_from_options(options)
+detector = None
+
+def _load_detector():
+    global detector
+    base_options=python.BaseOptions(model_asset_path=MODEL_PATH)
+    options=vision.FaceDetectorOptions(base_options=base_options)
+    detector=vision.FaceDetector.create_from_options(options)
+
+detector_thread=threading.Thread(target=_load_detector)
+detector_thread.start()
 
 root=tk.Tk()
 root.title("Camera Config")
@@ -54,7 +63,13 @@ tk.Scale(root, variable=smoothing_var, from_=0.01, to=0.20, resolution=0.01, ori
 
 tk.Checkbutton(root, text="Show Preview Window", variable=prev_var).pack(pady=15)
 
-cap = cv2.VideoCapture(0)
+if platform.system() == "Windows":
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+elif platform.system() == "Darwin":
+    cap = cv2.VideoCapture(0, cv2.CAP_AVFOUNDATION)
+else:
+    cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAM_W)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_H)
 
@@ -62,6 +77,8 @@ ret, t_frame = cap.read()
 if not ret:
     raise RuntimeError("Failed to read from webcam")
 h, w, _ = t_frame.shape
+
+detector_thread.join()
 
 curr_x = None
 curr_y = None
