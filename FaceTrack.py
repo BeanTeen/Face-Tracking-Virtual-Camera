@@ -37,6 +37,13 @@ def _load_detector():
 detector_thread=threading.Thread(target=_load_detector)
 detector_thread.start()
 
+def open_v_cam(width, height, fps):
+    try:
+        cam = pyvirtualcam.Camera(width=width, height=height, fps=fps, fmt=pyvirtualcam.PixelFormat.BGR,)
+        return cam, f"Virtual Camera Active: {cam.device}"
+    except Exception as e:
+        print(f"No Virtual Cam available ({e}). Running in preview-only mode.")
+
 root=tk.Tk()
 root.title("Camera Config")
 root.geometry("500x300")
@@ -61,7 +68,12 @@ tk.Scale(root, variable=padding_var, from_=1.2, to=6.0, resolution=0.1, orient="
 tk.Label(root, text="Camera Smoothing").pack()
 tk.Scale(root, variable=smoothing_var, from_=0.01, to=0.20, resolution=0.01, orient="horizontal").pack(fill="x", padx=20)
 
-tk.Checkbutton(root, text="Show Preview Window", variable=prev_var).pack(pady=15)
+preview_check = tk.Checkbutton(root, text="Show Preview Window", variable=prev_var)
+preview_check.pack(pady=(15, 5))
+
+status_label = tk.Label(root, text="Starting...", fg="gray")
+status_label.pack(pady=5)
+
 
 if platform.system() == "Windows":
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
@@ -86,7 +98,15 @@ curr_crop_w = None
 curr_crop_h = None
 prev_open = True
 
-with pyvirtualcam.Camera(width=w, height=h, fps=30, fmt=pyvirtualcam.PixelFormat.BGR ) as vcam:
+vcam, status_txt = open_v_cam(w, h, CAM_FPS)
+prev_only = vcam is None
+status_label.config(text=status_txt, fg="gray" if prev_only else "green")
+
+if prev_only:
+    prev_var.set(True)
+    preview_check.config(state="disabled")
+
+try:
     while running:
         try:
             root.update()
@@ -175,8 +195,14 @@ with pyvirtualcam.Camera(width=w, height=h, fps=30, fmt=pyvirtualcam.PixelFormat
                 except cv2.error:
                     pass
                 prev_open = False
-
-cap.release()
-cv2.destroyAllWindows()
+finally:
+    if vcam is not None:
+        vcam.close()
+    cap.releas()
+    cv2.destroyAllWindows()
+    try:
+        root.destroy()
+    except tk.TclError:
+        pass
 
 
