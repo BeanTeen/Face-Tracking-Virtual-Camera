@@ -90,8 +90,6 @@ if not ret:
     raise RuntimeError("Failed to read from webcam")
 h, w, _ = t_frame.shape
 
-detector_thread.join()
-
 curr_x = None
 curr_y = None
 curr_crop_w = None
@@ -105,6 +103,8 @@ status_label.config(text=status_txt, fg="gray" if prev_only else "green")
 if prev_only:
     prev_var.set(True)
     preview_check.config(state="disabled")
+
+detector_thread.join()
 
 try:
     while running:
@@ -198,7 +198,7 @@ try:
 finally:
     if vcam is not None:
         vcam.close()
-    cap.releas()
+    cap.release()
     cv2.destroyAllWindows()
     try:
         root.destroy()
